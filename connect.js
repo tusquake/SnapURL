@@ -1,6 +1,8 @@
+require('dotenv').config();
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
-const uri = "mongodb+srv://tussu:tussu@cluster0.eer2j.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+// Use environment variables for database configuration
+const uri = process.env.MONGODB_URI || `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_CLUSTER}/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -22,7 +24,7 @@ async function connectDB() {
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
         // Set the database reference
-        db = client.db("url-shortner");
+        db = client.db(process.env.DB_NAME || "url-shortner");
         return db;
     } catch (error) {
         console.error("Failed to connect to MongoDB:", error);

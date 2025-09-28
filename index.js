@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { connectDB } = require('./connect');
@@ -10,7 +11,7 @@ connectDB().then(() => {
 });
 
 const app = express();
-const port = 8001;
+const port = process.env.PORT || 8001;
 
 // Enable CORS for all routes
 app.use(cors({
