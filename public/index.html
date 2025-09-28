@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkShort - URL Shortener</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-light: #ffffff;
+            --bg-gray: #f8fafc;
+            --bg-dark: #1e293b;
+            --text-light: #1f2937;
+            --text-gray: #6b7280;
+            --text-dark: #f1f5f9;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --radius: 0.75rem;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gray);
+            color: var(--text-light);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        body.dark {
+            --bg-light: #0f172a;
+            --bg-gray: #1e293b;
+            --bg-dark: #334155;
+            --text-light: #f1f5f9;
+            --text-gray: #94a3b8;
+            --text-dark: #1f2937;
+            --border: #334155;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .theme-btn {
+            background: var(--bg-gray);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-gray);
+        }
+
+        .theme-btn:hover {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            transform: translateY(-1px);
+        }
+
+        /* Main Content */
+        .main {
+            padding: 2rem 0;
+        }
+
+        .grid {
+            display: grid;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.25rem;
+        }
+
+        .stat-icon.primary {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .stat-icon.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .stat-icon.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .stat-icon.danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .stat-label {
+            color: var(--text-gray);
+            font-size: 0.875rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--bg-gray);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-gray);
+            color: var(--text-gray);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-dark);
+            color: var(--text-light);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* URL Items */
+        .url-item {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .url-item:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .url-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .url-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .short-url {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+            word-break: break-all;
+        }
+
+        .original-url {
+            color: var(--text-gray);
+            font-size: 0.875rem;
+            word-break: break-all;
+        }
+
+        .url-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .url-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .url-stat {
+            text-align: center;
+        }
+
+        .url-stat-number {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .url-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Result Messages */
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .result.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .result.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .result.loading {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+        }
+
+        .loading-spinner {
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+
+            .grid-2,
+            .grid-4 {
+                grid-template-columns: 1fr;
+            }
+
+            .url-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .url-actions {
+                align-self: stretch;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo">
+                    <i class="fas fa-link"></i>
+                    LinkShort
+                </div>
+                <button class="theme-btn" id="themeBtn">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Stats -->
+            <div class="grid grid-4">
+                <div class="card stat-card">
+                    <div class="stat-icon primary">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <div class="stat-number" id="totalUrls">0</div>
+                    <div class="stat-label">Total URLs</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-icon success">
+                        <i class="fas fa-mouse-pointer"></i>
+                    </div>
+                    <div class="stat-number" id="totalClicks">0</div>
+                    <div class="stat-label">Total Clicks</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-number" id="avgClicks">0</div>
+                    <div class="stat-label">Avg Clicks</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-icon danger">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="stat-number" id="todayClicks">0</div>
+                    <div class="stat-label">Today's Clicks</div>
+                </div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="grid grid-2">
+                <!-- URL Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-plus-circle"></i>
+                        Create Short URL
+                    </div>
+                    <form id="urlForm">
+                        <div class="form-group">
+                            <label class="label">Enter URL to shorten</label>
+                            <input type="url" class="input" id="urlInput" placeholder="https://example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Custom Alias (Optional)</label>
+                            <input type="text" class="input" id="customAlias" placeholder="my-link">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-magic"></i>
+                            Create Short URL
+                        </button>
+                    </form>
+                    <div id="result"></div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-bolt"></i>
+                        Quick Actions
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <button class="btn btn-secondary" id="refreshBtn">
+                            <i class="fas fa-sync"></i>
+                            Refresh URLs
+                        </button>
+                        <button class="btn btn-secondary" id="exportBtn">
+                            <i class="fas fa-download"></i>
+                            Export CSV
+                        </button>
+                        <button class="btn btn-secondary" id="clearBtn">
+                            <i class="fas fa-broom"></i>
+                            Clear Results
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- URLs List -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-list"></i>
+                    Your URLs
+                </div>
+                <div id="urlsList">
+                    <!-- URLs will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Analytics Chart -->
+            <div class="card" id="analyticsCard" style="display: none;">
+                <div class="card-header">
+                    <i class="fas fa-chart-line"></i>
+                    Analytics Dashboard
+                    <button class="btn btn-secondary"
+                        style="margin-left: auto; font-size: 0.75rem; padding: 0.5rem 1rem;" onclick="closeAnalytics()">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+                <div id="analyticsContent">
+                    <!-- Analytics content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global Variables
+        let allUrls = [];
+        let isDark = localStorage.getItem('theme') === 'dark';
+        let analyticsChart = null;
+        let currentAnalyticsUrl = null;
+
+        // API Configuration
+        const API_BASE = window.location.origin.includes('5500')
+            ? 'http://localhost:8001/url'
+            : `${window.location.origin}/url`;
+
+        // Initialize App
+        function init() {
+            console.log('🚀 LinkShort initialized');
+            console.log('API Base:', API_BASE);
+
+            // Set theme
+            document.body.className = isDark ? 'dark' : '';
+            document.getElementById('themeIcon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+
+            // Event listeners
+            document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+            document.getElementById('urlForm').addEventListener('submit', handleSubmit);
+            document.getElementById('refreshBtn').addEventListener('click', loadUrls);
+            document.getElementById('exportBtn').addEventListener('click', exportUrls);
+            document.getElementById('clearBtn').addEventListener('click', clearResults);
+
+            // Load initial data
+            loadUrls();
+            showToast('Welcome to LinkShort! 🎉', 'success');
+        }
+
+        // Theme Toggle
+        function toggleTheme() {
+            isDark = !isDark;
+            document.body.className = isDark ? 'dark' : '';
+            document.getElementById('themeIcon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+            // Update chart if visible
+            if (analyticsChart && currentAnalyticsUrl) {
+                const chartData = prepareChartData(currentAnalyticsUrl.visitHistory || []);
+                createAnalyticsChart(chartData);
+            }
+
+            showToast(`Switched to ${isDark ? 'dark' : 'light'} theme`, 'success');
+        }
+
+        // Form Submit Handler
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const url = document.getElementById('urlInput').value.trim();
+            const alias = document.getElementById('customAlias').value.trim();
+
+            if (!url) {
+                showError('Please enter a URL');
+                return;
+            }
+
+            try {
+                showLoading('Creating short URL...');
+
+                const body = { url };
+                if (alias) body.customAlias = alias;
+
+                const response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`Server error: ${error}`);
+                }
+
+                const data = await response.json();
+                showSuccess(data.id, url);
+                document.getElementById('urlForm').reset();
+                loadUrls();
+                showToast('Short URL created successfully!', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message);
+                showToast('Failed to create URL', 'error');
+            }
+        }
+
+        // Load URLs
+        async function loadUrls() {
+            try {
+                const response = await fetch(API_BASE);
+                if (!response.ok) throw new Error('Failed to load URLs');
+
+                const data = await response.json();
+                allUrls = data.urls || [];
+                updateStats();
+                displayUrls();
+
+            } catch (error) {
+                console.error('Error loading URLs:', error);
+                showError('Failed to load URLs: ' + error.message);
+            }
+        }
+
+        // Update Statistics
+        function updateStats() {
+            const totalUrls = allUrls.length;
+            const totalClicks = allUrls.reduce((sum, url) => sum + (url.visitCount || 0), 0);
+            const avgClicks = totalUrls > 0 ? Math.round(totalClicks / totalUrls) : 0;
+            const today = new Date().toDateString();
+            const todayClicks = allUrls.filter(url =>
+                url.lastVisited && new Date(url.lastVisited).toDateString() === today
+            ).reduce((sum, url) => sum + (url.visitCount || 0), 0);
+
+            document.getElementById('totalUrls').textContent = totalUrls;
+            document.getElementById('totalClicks').textContent = totalClicks.toLocaleString();
+            document.getElementById('avgClicks').textContent = avgClicks;
+            document.getElementById('todayClicks').textContent = todayClicks;
+        }
+
+        // Display URLs
+        function displayUrls() {
+            const container = document.getElementById('urlsList');
+
+            if (allUrls.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--text-gray);">
+                        <i class="fas fa-link" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                        <p>No URLs found. Create your first short URL!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = allUrls.map(url => `
+                <div class="url-item">
+                    <div class="url-header">
+                        <div class="url-info">
+                            <div class="short-url">${getShortUrl(url.shortId)}</div>
+                            <div class="original-url">${url.redirectUrl}</div>
+                        </div>
+                        <div class="url-actions">
+                            <button class="btn btn-success" onclick="visitUrl('${url.shortId}')" title="Visit">
+                                <i class="fas fa-external-link-alt"></i>
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyUrl('${getShortUrl(url.shortId)}')" title="Copy">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="btn btn-secondary" onclick="showAnalytics('${url.shortId}')" title="Analytics">
+                                <i class="fas fa-chart-bar"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteUrl('${url.shortId}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="url-stats">
+                        <div class="url-stat">
+                            <div class="url-stat-number">${url.visitCount || 0}</div>
+                            <div class="url-stat-label">Clicks</div>
+                        </div>
+                        <div class="url-stat">
+                            <div class="url-stat-number">${formatDate(url.createdAt)}</div>
+                            <div class="url-stat-label">Created</div>
+                        </div>
+                        <div class="url-stat">
+                            <div class="url-stat-number">${url.lastVisited ? formatDate(url.lastVisited) : 'Never'}</div>
+                            <div class="url-stat-label">Last Visit</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Utility Functions
+        function getShortUrl(shortId) {
+            // Always use port 8001 for the short URLs since that's where the backend runs
+            const baseUrl = window.location.origin.includes('5500')
+                ? 'http://localhost:8001'
+                : window.location.origin;
+            return `${baseUrl}/url/${shortId}`;
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString();
+        }
+
+        // URL Actions
+        function visitUrl(shortId) {
+            const url = getShortUrl(shortId);
+            window.open(url, '_blank');
+            showToast('Opening URL...', 'success');
+            setTimeout(loadUrls, 1000); // Refresh after visit
+        }
+
+        function copyUrl(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('URL copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('Failed to copy URL', 'error');
+            });
+        }
+
+        async function deleteUrl(shortId) {
+            if (!confirm('Delete this URL? This action cannot be undone.')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/${shortId}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Failed to delete');
+
+                loadUrls();
+                showToast('URL deleted successfully', 'success');
+            } catch (error) {
+                showToast('Failed to delete URL', 'error');
+            }
+        }
+
+        async function showAnalytics(shortId) {
+            try {
+                const response = await fetch(`${API_BASE}/${shortId}/analytics`);
+                if (!response.ok) throw new Error('Failed to load analytics');
+
+                const data = await response.json();
+                displayAnalytics(data);
+            } catch (error) {
+                showError('Failed to load analytics: ' + error.message);
+            }
+        }
+
+        // Export URLs
+        function exportUrls() {
+            if (allUrls.length === 0) {
+                showToast('No URLs to export', 'error');
+                return;
+            }
+
+            const csv = [
+                ['Short ID', 'Original URL', 'Short URL', 'Clicks', 'Created', 'Last Visited'],
+                ...allUrls.map(url => [
+                    url.shortId,
+                    url.redirectUrl,
+                    getShortUrl(url.shortId),
+                    url.visitCount || 0,
+                    formatDate(url.createdAt),
+                    url.lastVisited ? formatDate(url.lastVisited) : 'Never'
+                ])
+            ].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `urls-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showToast('URLs exported successfully!', 'success');
+        }
+
+        // Display Functions
+        function showSuccess(shortId, originalUrl) {
+            const shortUrl = getShortUrl(shortId);
+            document.getElementById('result').innerHTML = `
+                <div class="result success">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <h3>✅ Success!</h3>
+                        <p><strong>Short URL:</strong> <a href="${shortUrl}" target="_blank" style="color: var(--primary);">${shortUrl}</a></p>
+                        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                            <button class="btn btn-primary" onclick="copyUrl('${shortUrl}')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            <button class="btn btn-secondary" onclick="visitUrl('${shortId}')">
+                                <i class="fas fa-external-link-alt"></i> Visit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayAnalytics(analytics) {
+            document.getElementById('result').innerHTML = `
+                <div class="result success">
+                    <i class="fas fa-chart-line"></i>
+                    <div>
+                        <h3>📊 Analytics: ${analytics.shortId}</h3>
+                        <p><strong>Total Visits:</strong> ${analytics.totalVisits}</p>
+                        <p><strong>Created:</strong> ${formatDate(analytics.createdAt)}</p>
+                        <p><strong>Last Visit:</strong> ${analytics.lastVisited ? formatDate(analytics.lastVisited) : 'Never'}</p>
+                        ${analytics.visitHistory && analytics.visitHistory.length > 0 ? `
+                            <div style="margin-top: 1rem;">
+                                <strong>Recent Visits:</strong>
+                                <div style="max-height: 150px; overflow-y: auto; margin-top: 0.5rem;">
+                                    ${analytics.visitHistory.slice(0, 5).map(visit => `
+                                        <div style="padding: 0.25rem 0; font-size: 0.875rem; color: var(--text-gray);">
+                                            ${new Date(visit.timestamp).toLocaleString()}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showLoading(message) {
+            document.getElementById('result').innerHTML = `
+                <div class="result loading">
+                    <div class="loading-spinner"></div>
+                    <div>${message}</div>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            document.getElementById('result').innerHTML = `
+                <div class="result error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Error:</strong> ${message}
+                    </div>
+                </div>
+            `;
+        }
+
+        function clearResults() {
+            document.getElementById('result').innerHTML = '';
+            showToast('Results cleared', 'success');
+        }
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                ${message}
+            `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>
