@@ -1,38 +1,34 @@
 # LinkShort - URL Shortener
-
-A modern, full-featured URL shortener built with Node.js, Express, and MongoDB Atlas.
+Ek modern aur full-featured URL shortener jo Node.js, Express, aur MongoDB Atlas ke saath banaya gaya hai.
 
 ## Features
-
-- 🔗 **URL Shortening** - Create short URLs from long ones
-- 📊 **Analytics** - Track clicks and visit history
-- 🎨 **Modern UI** - Beautiful, responsive dashboard
-- 🌙 **Dark/Light Theme** - Toggle between themes
-- 📱 **Mobile Friendly** - Works on all devices
-- 🔒 **Secure** - Environment-based configuration
+- URL Shortening - Lambe URLs ko chote mein convert kariye
+- Analytics - Clicks aur visit history track kariye
+- Modern UI - Beautiful aur responsive dashboard
+- Dark/Light Theme - Themes ke beech switch kariye
+- Mobile Friendly - Sabhi devices par kaam karta hai
+- Secure - Environment-based configuration
 
 ## Quick Start
 
-### 1. Clone the Repository
+### 1. Repository Clone Kariye
 ```bash
 git clone <repository-url>
 cd url-shortner
 ```
 
-### 2. Install Dependencies
+### 2. Dependencies Install Kariye
 ```bash
 npm install
 ```
 
 ### 3. Environment Setup
-Copy the example environment file and configure your settings:
-
+Example environment file copy kariye aur apni settings configure kariye:
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your MongoDB Atlas credentials:
-
+`.env` file mein apne MongoDB Atlas credentials daalne:
 ```env
 # Database Configuration
 DB_USERNAME=your_username
@@ -48,7 +44,7 @@ NODE_ENV=development
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 ```
 
-### 4. Start the Application
+### 4. Application Start Kariye
 ```bash
 # Development mode
 npm run dev
@@ -57,24 +53,23 @@ npm run dev
 npm start
 ```
 
-### 5. Access the Application
-Open your browser and go to: `http://localhost:8001`
+### 5. Application Access Kariye
+Browser mein jaiye: `http://localhost:8001`
 
 ## Environment Variables
-
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `DB_USERNAME` | MongoDB Atlas username | - |
 | `DB_PASSWORD` | MongoDB Atlas password | - |
 | `DB_CLUSTER` | MongoDB Atlas cluster URL | - |
-| `DB_NAME` | Database name | `url-shortner` |
+| `DB_NAME` | Database ka naam | `url-shortner` |
 | `PORT` | Server port | `8001` |
 | `NODE_ENV` | Environment mode | `development` |
 | `MONGODB_URI` | Complete MongoDB connection string | - |
 
 ## API Endpoints
 
-### Create Short URL
+### Short URL Banayiye
 ```http
 POST /url
 Content-Type: application/json
@@ -84,28 +79,27 @@ Content-Type: application/json
 }
 ```
 
-### Get All URLs
+### Saare URLs Get Kariye
 ```http
 GET /url
 ```
 
-### Redirect to Original URL
+### Original URL Par Redirect Kariye
 ```http
 GET /url/:shortId
 ```
 
-### Get URL Analytics
+### URL Analytics Get Kariye
 ```http
 GET /url/:shortId/analytics
 ```
 
-### Delete URL
+### URL Delete Kariye
 ```http
 DELETE /url/:shortId
 ```
 
 ## Technologies Used
-
 - **Backend**: Node.js, Express.js
 - **Database**: MongoDB Atlas
 - **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
@@ -114,8 +108,7 @@ DELETE /url/:shortId
 - **Environment**: dotenv
 
 ## Security Features
-
-- Environment variables for sensitive data
+- Sensitive data ke liye environment variables
 - CORS protection
 - Input validation
 - Error handling
@@ -137,18 +130,30 @@ url-shortner/
 ```
 
 ### Available Scripts
-- `npm run dev` - Start development server with nodemon
-- `npm start` - Start production server
-- `npm install` - Install dependencies
+- `npm run dev` - Development server start kariye nodemon ke saath
+- `npm start` - Production server start kariye
+- `npm install` - Dependencies install kariye
 
-## Contributing
+## Setup Guide - Step by Step
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+### MongoDB Atlas Setup
+1. MongoDB Atlas par account banayiye ya login kariye
+2. Naya cluster create kariye
+3. Database user banayiye aur password set kariye
+4. Network access mein IP address allow kariye (0.0.0.0/0 for all)
+5. Connection string copy kariye
 
-## License
+### Local Development
+1. Project folder mein navigate kariye
+2. Dependencies install kariye: `npm install`
+3. `.env` file banayiye aur database credentials add kariye
+4. Development server start kariye: `npm run dev`
+5. Browser mein `http://localhost:8001` par jaiye
 
-This project is open source and available under the [MIT License](LICENSE).
+### Production Deployment
+1. Environment variables properly set kariye
+2. `NODE_ENV=production` set kariye
+3. Production server start kariye: `npm start`
+
+
+
